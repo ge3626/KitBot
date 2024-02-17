@@ -11,30 +11,27 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.Autos;
 import frc.robot.commands.FeedCommand;
 import frc.robot.commands.ShootCommand;
+import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
   private RobotContainer m_robotContainer;
   
   //TODO: set constants
   private final XboxController m_controller = new XboxController(0); 
-
-  //left motors
-  private final WPI_VictorSPX m_leftMotorMaster = new WPI_VictorSPX(4); 
-  private final WPI_VictorSPX m_leftMotorSlave = new WPI_VictorSPX(5);
-
-  //right motors
-  private final WPI_VictorSPX m_rightMotorMaster = new WPI_VictorSPX(3);
-  private final WPI_VictorSPX m_rightMotorSlave = new WPI_VictorSPX(6);
   
+  private final DriveTrain drive = new DriveTrain();
   private final Shooter shooter = new Shooter();
   
+  
+  //Commands
   private Command feed = new FeedCommand(shooter);
   private Command shoot = new ShootCommand(shooter);
+  private Command m_autonomousCommand = Autos.FirstAuto(drive, shooter);
 
   double moveSpeed;
   double rotateSpeed;
@@ -42,22 +39,13 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     m_robotContainer = new RobotContainer();
-    
-    m_leftMotorSlave.follow(m_leftMotorMaster);
-    m_rightMotorSlave.follow(m_rightMotorMaster);
-
-    m_rightMotorMaster.setInverted(true);
-
-    m_leftMotorSlave.setInverted(InvertType.FollowMaster);
-    m_rightMotorSlave.setInverted(InvertType.FollowMaster);
-    
   }
 
 
   @Override
   public void robotPeriodic() {
     //get speed
-    moveSpeed = -m_controller.getLeftY(); //TODO
+    moveSpeed = -m_controller.getLeftY(); 
     rotateSpeed = m_controller.getRightX();
 
     if(Math.abs(moveSpeed) < 0.05) {
@@ -68,7 +56,7 @@ public class Robot extends TimedRobot {
       rotateSpeed = 0;
     }
     
-    arcadeDrive(moveSpeed * 0.2, rotateSpeed * 0.1);
+    drive.arcadeDrive(moveSpeed * 0.2, rotateSpeed * 0.1);
 
     if (m_controller.getAButtonPressed()) {
       shoot.schedule();
@@ -82,10 +70,6 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
   }
 
-  private void arcadeDrive(double moveSpeed, double rotateSpeed) {
-    m_leftMotorMaster.set(rotateSpeed + moveSpeed);
-    m_rightMotorMaster.set(-rotateSpeed + moveSpeed);
-  }
 
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -98,12 +82,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    m_autonomousCommand.schedule();
   }
 
   /** This function is called periodically during autonomous. */

@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Shooter;
@@ -14,8 +12,8 @@ public class ShootCommand extends Command {
         this.shooter = shooter;
         addRequirements(shooter);
     }
-    Timer timer = new Timer();
 
+    Timer timer = new Timer();
     double feedSpeed;
     double shootSpeed;
     
